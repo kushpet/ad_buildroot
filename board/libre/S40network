@@ -24,7 +24,7 @@ create_system_files () {
 	ETH1_NETMASK=`fw_printenv -n net1mask_eth 2> /dev/null || echo 255.255.255.1`
 
 
-	ETH_IPADDR=`fw_printenv -n ipaddr_eth 2> /dev/nulli || echo 192.168.1.10`
+	ETH_IPADDR=`fw_printenv -n ipaddr_eth 2> /dev/null || echo 192.168.1.10`
 	ETH_NETMASK=`fw_printenv -n netmask_eth 2> /dev/null || echo 255.255.255.0`
 	ETH_GATEWAY=`fw_printenv -n eth_gateway 2> /dev/null || echo 192.168.1.1`
 
@@ -34,7 +34,7 @@ create_system_files () {
 
 	XO_CORRECTION=`fw_printenv -n xo_correction 2> /dev/null`
 	UDC_HANDLE_SUSPEND=`fw_printenv -n udc_handle_suspend 2> /dev/null || echo 0`
-	USB_ETH_MODE=`fw_printenv -n usb_ethernet_mode 2> /dev/null || echo 0`
+	USB_ETH_MODE=`fw_printenv -n usb_ethernet_mode 2> /dev/null || echo rndis`
 
 	### /etc/udhcpd.conf ###
 	echo "start $IPADDR_HOST" > $UDHCPD_CONF
