@@ -6,7 +6,7 @@ my_umount()
 {
 	if grep -qs "^/dev/$1 " /proc/mounts ; then
 		umount "${destdir}/$1";
-		echo heartbeat > /sys/class/leds/led0:green/trigger
+		echo heartbeat > /sys/class/leds/pl_led1:blue/trigger
 	fi
 
 	[ -d "${destdir}/$1" ] && rmdir "${destdir}/$1"
@@ -47,7 +47,7 @@ my_mount()
 		exit 1
 	fi
 
-	echo default-on > /sys/class/leds/led0:green/trigger
+	echo default-on > /sys/class/leds/pl_led1:blue/trigger
 
 	for i in ${destdir}/$1/runme??* ;do
 

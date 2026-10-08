@@ -35,13 +35,13 @@ dfu() {
 }
 
 flash_indication_on() {
-	echo timer > /sys/class/leds/led0:green/trigger
-	echo 40 > /sys/class/leds/led0:green/delay_off
-	echo 40 > /sys/class/leds/led0:green/delay_on
+	echo timer > /sys/class/leds/pl_led1:blue/trigger
+	echo 40 > /sys/class/leds/pl_led1:blue/delay_off
+	echo 40 > /sys/class/leds/pl_led1:blue/delay_on
 }
 
 flash_indication_off() {
-	echo heartbeat > /sys/class/leds/led0:green/trigger
+	echo heartbeat > /sys/class/leds/pl_led1:blue/trigger
 }
 
 make_diagnostic_report () {

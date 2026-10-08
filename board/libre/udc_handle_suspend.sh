@@ -18,12 +18,12 @@ case "$state" in
 	suspended)
 		prev_ensm_mode=`cat /sys/bus/iio/devices/${DEV_NAME}/ensm_mode`
 		echo sleep > /sys/bus/iio/devices/${DEV_NAME}/ensm_mode
-		echo none > /sys/class/leds/led0:green/trigger
+		echo none > /sys/class/leds/pl_led1:blue/trigger
 		echo "UDC: $state: $prev_ensm_mode -> sleep" | logger
 		;;
 	*)
 		current_ensm_mode=`cat /sys/bus/iio/devices/${DEV_NAME}/ensm_mode`
-		echo heartbeat > /sys/class/leds/led0:green/trigger
+		echo heartbeat > /sys/class/leds/pl_led1:blue/trigger
 		if [ "$current_ensm_mode" != "$prev_ensm_mode" ]
 		then
 		  echo $prev_ensm_mode > /sys/bus/iio/devices/${DEV_NAME}/ensm_mode
