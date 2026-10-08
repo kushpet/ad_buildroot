@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Bring the Ethernet link up before the USB gadget is bound (S23udc).
+#
+# On LibreSDR, if the gigabit PHY negotiates its link at the same moment
+# the host enumerates the USB gadget, the host fails enumeration
+# (descriptor read error -71) and drops the device. Negotiating the link
+# first avoids the overlap. Addresses are still configured by S40network;
+# its ifup finds the link already up and does not renegotiate.
+#
+
+case "$1" in
+  start)
+	[ -d /sys/class/net/eth0 ] || exit 0
+	echo -n "Starting Ethernet link: "
+	ip link set eth0 up
+	i=0
+	while [ "`cat /sys/class/net/eth0/carrier 2>/dev/null`" != "1" ] && [ $i -lt 50 ]; do
+		sleep 0.1
+		i=$((i+1))
+	done
+	[ "`cat /sys/class/net/eth0/carrier 2>/dev/null`" = "1" ] && echo "up" || echo "no carrier"
+	;;
+  stop|restart|reload)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0
