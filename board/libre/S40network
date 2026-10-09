@@ -27,6 +27,7 @@ create_system_files () {
 	ETH_IPADDR=`fw_printenv -n ipaddr_eth 2> /dev/null || echo 192.168.1.10`
 	ETH_NETMASK=`fw_printenv -n netmask_eth 2> /dev/null || echo 255.255.255.0`
 	ETH_GATEWAY=`fw_printenv -n eth_gateway 2> /dev/null || echo 192.168.1.1`
+	ETH_MODE=`fw_printenv -n eth_mode 2> /dev/null || echo auto`
 
 	WLAN_SSID=`fw_printenv -n ssid_wlan 2> /dev/null`
 	WLAN_PWD=`fw_printenv -n pwd_wlan 2> /dev/null`
@@ -47,7 +48,8 @@ create_system_files () {
 	echo -e "auto usb0\n""iface usb0 inet static" >> $IFAC
 	echo -e "\taddress $IPADDR\n""\tnetmask $NETMASK\n" >> $IFAC
 
-	echo -e "auto eth0" >> $IFAC
+	# S22ethlink powers the PHY down (no cable / eth_mode=off): do not bring eth0 up
+	[ -e /var/run/eth0.off ] || echo -e "auto eth0" >> $IFAC
 	if [ -n "$ETH_IPADDR" ]
 	then
 		echo -e "iface eth0 inet static" >> $IFAC
@@ -114,6 +116,8 @@ create_system_files () {
 	echo "[USB_ETHERNET]"$'\r' >> $CONF
 	echo "ipaddr_eth = $ETH_IPADDR"$'\r' >> $CONF
 	echo "netmask_eth = $ETH_NETMASK"$'\r' >> $CONF
+	echo "# Onboard Ethernet [auto|on|off]: auto = only if a cable is plugged in at boot"$'\r' >> $CONF
+	echo "eth_mode = $ETH_MODE"$'\r' >> $CONF
 	echo ""$'\r'>> $CONF
 	echo "[SYSTEM]"$'\r' >> $CONF
 	echo "xo_correction = $XO_CORRECTION"$'\r' >> $CONF

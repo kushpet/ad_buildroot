@@ -1,25 +1,52 @@
 #!/bin/sh
 #
-# Bring the Ethernet link up before the USB gadget is bound (S23udc).
+# Decide whether the onboard Ethernet runs, before the USB gadget is bound (S23udc).
 #
-# On LibreSDR, if the gigabit PHY negotiates its link at the same moment
-# the host enumerates the USB gadget, the host fails enumeration
-# (descriptor read error -71) and drops the device. Negotiating the link
-# first avoids the overlap. Addresses are still configured by S40network;
-# its ifup finds the link already up and does not renegotiate.
+# On LibreSDR the running Ethernet PHY disturbs the USB (ULPI) link:
+#  - if the PHY negotiates at the same moment the host enumerates the gadget,
+#    the host fails enumeration (descriptor read error -71);
+#  - with the PHY powered, even without a cable, the host drops the gadget
+#    within about a minute.
+# With eth0 down (PHY powered down) USB is stable.
 #
+# eth_mode (u-boot env, set via config.txt [USB_ETHERNET]):
+#   auto (default) - bring eth0 up, wait up to 5 s for a cable;
+#                    if there is no carrier, power the PHY down.
+#   on             - always up (cable may be plugged in later).
+#   off            - always down.
+# When eth0 is down, /var/run/eth0.off tells S40network not to bring it up.
+# Addresses are still configured by S40network.
+#
+
+FLAG=/var/run/eth0.off
 
 case "$1" in
   start)
 	[ -d /sys/class/net/eth0 ] || exit 0
-	echo -n "Starting Ethernet link: "
+	MODE=`fw_printenv -n eth_mode 2> /dev/null || echo auto`
+	rm -f $FLAG
+	echo -n "Starting Ethernet link ($MODE): "
+	if [ "$MODE" = "off" ]; then
+		ip link set eth0 down
+		touch $FLAG
+		echo "off"
+		exit 0
+	fi
 	ip link set eth0 up
 	i=0
 	while [ "`cat /sys/class/net/eth0/carrier 2>/dev/null`" != "1" ] && [ $i -lt 50 ]; do
 		sleep 0.1
 		i=$((i+1))
 	done
-	[ "`cat /sys/class/net/eth0/carrier 2>/dev/null`" = "1" ] && echo "up" || echo "no carrier"
+	if [ "`cat /sys/class/net/eth0/carrier 2>/dev/null`" = "1" ]; then
+		echo "up"
+	elif [ "$MODE" = "on" ]; then
+		echo "no carrier, kept up"
+	else
+		ip link set eth0 down
+		touch $FLAG
+		echo "no carrier, powered down"
+	fi
 	;;
   stop|restart|reload)
 	;;
