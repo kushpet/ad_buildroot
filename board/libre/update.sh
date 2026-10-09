@@ -101,6 +101,7 @@ process_ini() {
 		echo "ipaddr_eth $ipaddr_eth" >> /opt/fw_set.tmp
 		echo "netmask_eth $netmask_eth" >> /opt/fw_set.tmp
 		echo "eth_mode $eth_mode" >> /opt/fw_set.tmp
+		case "$maxcpus" in 1|2) echo "maxcpus $maxcpus" >> /opt/fw_set.tmp ;; esac
 		fw_setenv -s /opt/fw_set.tmp
 		rm /opt/fw_set.tmp
 		flash_indication_off
