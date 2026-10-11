@@ -212,19 +212,22 @@ function CheckFrmVersion() {
 	req.done(function(response) {
 		var VerOnGithub = response[0].name;
 		var VerLocal = "#BUILD#";
+		/* LibreSDR follows ADI: compare the ADI release we are based on
+		 * (libre-v0.39.2-5-gabcd -> v0.39) with ADI's latest release. */
+		var VerBase = VerLocal.replace(/^libre-v(\d+)\.(\d+).*$/, "v$1.$2");
 		if (VerLocal.match(/BUILD/)) {
 			document.getElementById('versiontest').innerHTML = "Seems not to be deployed";
 			document.getElementById('sysroot').innerHTML = "Unknown SysRoot";
 			jQuery('#sysroot').removeAttr('href');
 		} else {
-			var res = versionCompare(VerLocal, VerOnGithub);
+			var res = versionCompare(VerBase, VerOnGithub);
 			var message;
 			var sysroot_message;
 			var j;
 			var k;
 			var sysroot_url = null;
 			for (j = 0; j < response.length; j++) {
-				if (response[j].name.match(VerLocal+"$")) {
+				if (response[j].name.match(VerBase+"$")) {
 					for (k = 0; k < response[j].assets.length; k++) {
 						if (response[j].assets[k].name.match(/sysroot/i)) {
 							sysroot_url = response[j].assets[k].browser_download_url;
@@ -235,24 +238,24 @@ function CheckFrmVersion() {
 				}
 			}
 			if (res < 0) {
-				message = "Newer version available online (Version " + VerOnGithub + " )";
+				message = "ADI released " + VerOnGithub + "; this LibreSDR firmware (" +
+						VerLocal + ") is based on ADI " + VerBase + ".";
 				if (sysroot_url)
-					sysroot_message = "Old Sysroot for firmware " + VerLocal +
-						" (please upgrade firmware to " + VerOnGithub + ")";
+					sysroot_message = "ADI SYSROOT " + VerBase;
 				else
-					sysroot_message = "No Sysroot for firmware " + VerLocal +
-						" (please upgrade firmware to " + VerOnGithub + ")";
+					sysroot_message = "No ADI SYSROOT for " + VerBase;
 				document.getElementById('versionsection').className = "download";
 			} else  if (res > 0) {
-				message = "Wow! Your Pluto Firmware Version " + VerLocal +
-						" is newer than (" + VerOnGithub + ") on Github.";
+				message = "LibreSDR firmware " + VerLocal + " is based on ADI " + VerBase +
+						", newer than ADI's latest release " + VerOnGithub + ".";
 				sysroot_message = "Firmware " + VerLocal + " doesn't have pre-built SYSROOT";
 				jQuery('#sysroot').removeAttr('href');
 				document.getElementById('versionsection').className = "";
 				document.getElementById('plutsdr-fw-download').style.visibility = "hidden";
 				document.getElementById('hideupgrade').style.display = "none";
 			} else if (res == 0) {
-				message = "Pluto is using the same version as latest release!";
+				message = "LibreSDR firmware " + VerLocal + " is based on the latest ADI release (" +
+						VerOnGithub + ").";
 				sysroot_message = "SYSROOT for firmware version " + VerOnGithub;
 				document.getElementById('versionsection').className = "";
 				document.getElementById('plutsdr-fw-download').style.visibility = "hidden";
@@ -263,8 +266,9 @@ function CheckFrmVersion() {
 				document.getElementById('versionsection').className = "";
 			}
 			document.getElementById('versiontest').innerHTML = message;
-			document.getElementById('plutsdr-fw-download').innerHTML = "Download version " + VerOnGithub;
-			jQuery('#plutsdr-fw-download').attr ('href', response[0].assets[0].browser_download_url);
+			/* Link to ADI's release notes, not to the PlutoSDR firmware binary. */
+			document.getElementById('plutsdr-fw-download').innerHTML = "ADI release " + VerOnGithub;
+			jQuery('#plutsdr-fw-download').attr ('href', response[0].html_url);
 
 			document.getElementById('sysroot').innerHTML = sysroot_message;
 			if(sysroot_url)
