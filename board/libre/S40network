@@ -20,13 +20,9 @@ create_system_files () {
 	IPADDR_HOST=`fw_printenv -n ipaddr_host 2> /dev/null || echo 192.168.2.10`
 	NETMASK=`fw_printenv -n netmask 2> /dev/null || echo 255.255.255.0`
 
-	ETH1_IPADDR=`fw_printenv -n ipaddr_eth1 2> /dev/null || echo 192.168.3.8`
-	ETH1_NETMASK=`fw_printenv -n net1mask_eth 2> /dev/null || echo 255.255.255.1`
-
-
+	# LibreSDR has onboard Ethernet: default to a static address (Pluto: DHCP)
 	ETH_IPADDR=`fw_printenv -n ipaddr_eth 2> /dev/null || echo 192.168.1.10`
 	ETH_NETMASK=`fw_printenv -n netmask_eth 2> /dev/null || echo 255.255.255.0`
-	ETH_GATEWAY=`fw_printenv -n eth_gateway 2> /dev/null || echo 192.168.1.1`
 
 	WLAN_SSID=`fw_printenv -n ssid_wlan 2> /dev/null`
 	WLAN_PWD=`fw_printenv -n pwd_wlan 2> /dev/null`
@@ -47,25 +43,16 @@ create_system_files () {
 	echo -e "auto lo\n""iface lo inet loopback\n" > $IFAC
 	echo -e "auto usb0\n""iface usb0 inet static" >> $IFAC
 	echo -e "\taddress $IPADDR\n""\tnetmask $NETMASK\n" >> $IFAC
+	echo -e "auto usb1\n""iface usb1 inet dhcp\n" >> $IFAC
 
 	echo -e "auto eth0" >> $IFAC
 	if [ -n "$ETH_IPADDR" ]
 	then
 		echo -e "iface eth0 inet static" >> $IFAC
-		echo -e "\taddress $ETH_IPADDR\n""\tnetmask $ETH_NETMASK" >> $IFAC
-		echo -e "\tgateway $ETH_GATEWAY\n" >> $IFAC
+		echo -e "\taddress $ETH_IPADDR\n""\tnetmask $ETH_NETMASK\n" >> $IFAC
 	else
 		echo -e "iface eth0 inet dhcp\n" >> $IFAC
 	fi
-
-	# echo -e "auto eth0:0" >> $IFAC
-	# if [ -n "$ETH1_IPADDR" ]
-	# then
-	# 	echo -e "iface eth0:0 inet static" >> $IFAC
-	# 	echo -e "\taddress  $ETH1_IPADDR\n""\tnetmask $ETH1_NETMASK" >> $IFAC
-	# else
-	# 	echo -e "iface eth0:0 inet dhcp\n" >> $IFAC
-	# fi
 
 	### /etc/wpa.conf ###
 	if [ -n "$WLAN_SSID" ]
