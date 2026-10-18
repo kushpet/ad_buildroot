@@ -10,7 +10,7 @@ case "$1" in
 	for dev in /sys/bus/iio/devices/iio:device*; do
 		[ "`cat $dev/name 2>/dev/null`" = "dac5311" ] || continue
 		echo -n "Setting VCTCXO DAC to mid-scale: "
-		echo 128 > $dev/out_voltage0_raw && echo "OK" || echo "FAIL"
+		echo 128 > $dev/out_voltage_raw && echo "OK" || echo "FAIL"
 	done
 	;;
   stop|restart|reload)
