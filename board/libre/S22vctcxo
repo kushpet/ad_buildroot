@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# The 40 MHz VCTCXO (Y2) is tuned by a DAC5311 (U12, 8 bit, Vref = +3.3V_CLK).
+# The DAC powers up at zero scale, which holds the oscillator at the edge of
+# its pull range. Set mid-scale (128, about 1.65 V) at boot.
+#
+
+case "$1" in
+  start)
+	for dev in /sys/bus/iio/devices/iio:device*; do
+		[ "`cat $dev/name 2>/dev/null`" = "dac5311" ] || continue
+		echo -n "Setting VCTCXO DAC to mid-scale: "
+		echo 128 > $dev/out_voltage0_raw && echo "OK" || echo "FAIL"
+	done
+	;;
+  stop|restart|reload)
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0
